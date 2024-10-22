@@ -1,0 +1,84 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id           Int           @id @default(autoincrement())
+  first_name   String
+  email        String        @unique
+  password     String?
+  createdAt    DateTime      @default(now())
+  updatedAt    DateTime      @updatedAt
+  accounts     Account[]
+  transactions Transaction[]
+  budgets      Budget[]
+}
+
+model Account {
+  id           Int           @id @default(autoincrement())
+  name         String
+  initialAmount Int
+  notes        String?
+  userId       Int
+  user         User          @relation(fields: [userId], references: [id])
+  transactions Transaction[]
+  createdAt    DateTime      @default(now())
+  updatedAt    DateTime      @updatedAt
+  deleted Boolean @default(false)
+}
+
+model Transaction {
+  id           Int           @id @default(autoincrement())
+  name         String
+  amountSpend  Int
+  type         String
+  userId       Int
+  user         User          @relation(fields: [userId], references: [id])
+  accountId    Int
+  account      Account       @relation(fields: [accountId], references: [id])
+  subCategoryId Int
+  subCategory  SubCategory   @relation(fields: [subCategoryId], references: [id])
+  createdAt    DateTime      @default(now())
+  updatedAt    DateTime      @updatedAt
+  deleted Boolean @default(false)
+}
+
+model Budget {
+  id           Int           @id @default(autoincrement())
+  name         String
+  userId       Int
+  user         User          @relation(fields: [userId], references: [id])
+  budgetTill   DateTime
+  subCategoryId Int
+  subCategory  SubCategory   @relation(fields: [subCategoryId], references: [id])
+  createdAt    DateTime      @default(now())
+  updatedAt    DateTime      @updatedAt
+  deleted Boolean @default(false)
+}
+
+model Category {
+  id           Int           @id @default(autoincrement())
+  name         String
+  createdAt    DateTime      @default(now())
+  updatedAt    DateTime      @updatedAt
+  subCategories SubCategory[]
+  type String
+  picture  String
+}
+
+model SubCategory {
+  id           Int           @id @default(autoincrement())
+  name         String
+  createdAt    DateTime      @default(now())
+  updatedAt    DateTime      @updatedAt
+  picture  String
+  categoryId   Int
+  category     Category      @relation(fields: [categoryId], references: [id])
+  transaction  Transaction[]
+  budget       Budget[]
+}
